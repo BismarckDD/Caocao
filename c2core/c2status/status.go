@@ -19,13 +19,31 @@ const (
 	UnitStatusMoraleDown    UnitStatus = 0x200
 	UnitStatusMoveUp        UnitStatus = 0x400
 	UnitStatusMoveDown      UnitStatus = 0x800
+
+	UnitStatusAllException UnitStatus = 0xf
+	UnitStatusAllUp        UnitStatus = 0x1f0
+	UnitStatusAllDown      UnitStatus = 0x360
 )
 
-type StrikeStatus uint8
+type StrikeAssist uint8
 
 const (
-	StrikeStatusForbiddenCS StrikeStatus = 0x1 // forbidden counter-strike
-	StrikeStatusEnableCCS   StrikeStatus = 0x2 // enable counter-counter-strike
-	StrikeStatusEnableLS    StrikeStatus = 0x4 // enable leading-strike
-	StrikeStatusEnablePS    StrikeStatus = 0x4 // enable pierce-strike
+	StrikeAssistForbiddenCS     StrikeAssist = 0x1  // forbidden counter-strike
+	StrikeAssistEnableCCS       StrikeAssist = 0x2  // enable counter-counter-strike
+	StrikeAssistEnableLS        StrikeAssist = 0x4  // enable leading-strike
+	StrikeAssistEnablePS        StrikeAssist = 0x8  // enable pierce-strike
+	StrikeAssistWithToxic       StrikeAssist = 0x10 // attack with toxic
+	StrikeAssistWithChaos       StrikeAssist = 0x20 // attack with chaos
+	StrikeAssistWithHold        StrikeAssist = 0x40 // attack with hold
+	StrikeAssistWithProhibition StrikeAssist = 0x80 // attack with prohibition
+)
+
+type SpellAssist uint8
+
+const (
+	SpellAssistLandEnhance  SpellAssist = 0x1  // enable wind magic damage
+	SpellAssistWaterEnhance SpellAssist = 0x2  // enable wind magic damage
+	SpellAssistFireEnhance  SpellAssist = 0x4  // enable wind magic damage
+	SpellAssistWindEnhance  SpellAssist = 0x8  // enable wind magic damage
+	SpellAssistMPReduce     SpellAssist = 0x10 // save mp when spell
 )

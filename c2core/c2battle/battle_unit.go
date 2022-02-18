@@ -17,7 +17,7 @@ type BattleUnit struct {
 
 // 获得攻击力
 func (battleUnit *BattleUnit) GetDamage() int {
-	return battleUnit.BaseDamage
+	return unit.GetAttack()
 }
 
 // 获得精神力

@@ -3,6 +3,8 @@ package c2char
 import (
 	"github.com/BismarckDD/Caocao/c2core/c2item"
 	"github.com/BismarckDD/Caocao/c2core/c2status"
+	"github.com/BismarckDD/Caocao/c2core/c2terrain"
+	"github.com/BismarckDD/Caocao/c2core/c2unit_category"
 )
 
 const (
@@ -12,71 +14,53 @@ const (
 	AbilityDownEff   int16 = 70
 )
 
-type UnitCategoryId uint32
-
-const (
-	// JunZhu
-	UnitCategoryQunXiong UnitCategoryId = 1
-
-	// WuJiang
-	UnitCategoryBuBing     UnitCategoryId = 1 << 1
-	UnitCategoryQiBing     UnitCategoryId = 1 << 2
-	UnitCategoryGongBing   UnitCategoryId = 1 << 3
-	UnitCategoryGongQiBing UnitCategoryId = 1 << 4
-
-	// 穿文官衣服的武将, 奋起、鼓舞、气合提升攻击力
-	UnitCategoryWuDaoJia UnitCategoryId = 1 << 5
-	UnitCategoryZeiBing  UnitCategoryId = 1 << 6
-	UnitCategoryWuNiang  UnitCategoryId = 1 << 7
-	UnitCategoryPaoChe   UnitCategoryId = 1 << 8
-
-	// WenGuan
-	UnitCategoryDaoShi      UnitCategoryId = 1 << 9  // XuanWuBaoYu
-	UnitCategoryCeShi       UnitCategoryId = 1 << 10 // ZhuQueBaoYu
-	UnitCategoryFengShuiShi UnitCategoryId = 1 << 11 // BaiHuBaoYu
-	UnitCategoryQiMaCeShi   UnitCategoryId = 1 << 12 // QingLongBaoYu
-
-	// Special
-	UnitCategoryXiLiangQiBing UnitCategoryId = 1 << 13
-	UnitCategoryHuangJinZei   UnitCategoryId = 1 << 14
-	UnitCategoryHaiDao        UnitCategoryId = 1 << 15
-	UnitCategoryDuDu          UnitCategoryId = 1 << 16 //
-	UnitCategoryZhouShuShi    UnitCategoryId = 1 << 17 // All skills but Four-Shen, Four-High, Weather.
-	UnitCategoryXianRen       UnitCategoryId = 1 << 18 // All skills
-	UnitCategoryXunXiongShi   UnitCategoryId = 1 << 19 // SCABB = QiBing
-	UnitCategoryXunHuShi      UnitCategoryId = 1 << 20 // ACASC = WuShuJia
-	UnitCategoryMuRen         UnitCategoryId = 1 << 21 // ACASC = WuShuJia
-	UnitCategoryTuOu          UnitCategoryId = 1 << 22 // SCSBB = XiLiangQiBing
-	UnitCategoryBaiXing       UnitCategoryId = 1 << 23 //
-	UnitCategoryHuangDi       UnitCategoryId = 1 << 24 //
-	UnitCategoryYunShuDui     UnitCategoryId = 1 << 25 // CBCCB
-	// ZiZhongDui    UnitCategoryId = 1 << 23
-	// LiangMoDui    UnitCategoryId = 1 << 24
-	// 还有6个兵种空余
-)
-
 type Unit struct {
 	Char  // each unit is a char
 	Level uint8
-	HP    uint16
-	MaxHP uint16
-	MP    uint16
-	MaxMP uint16
+	HP    int16
+	MaxHP int16
+	MP    int16
+	MaxMP int16
 	// unit
-	UnitCategory
-	UnitCategoryId uint32 // 兵种类型
-	// unit ability
-	c2status.UnitStatus // toxic, chaos, hold, prohibition,
-	Direction           uint8
-	Move                uint8
-	BaseAttack          int16
-	BaseSpirit          int16
-	BaseDefence         int16
-	BaseExplosive       int16
-	BaseMorale          int16
-	Weapon              *c2item.Item
-	Armor               *c2item.Item
-	Assist              *c2item.Item
+	c2unit_category.UnitCategory // Unit基础数据
+	c2status.UnitStatus          // toxic, chaos, hold, prohibition,
+	Direction                    uint8
+	BaseAttack                   int16
+	BaseSpirit                   int16
+	BaseDefence                  int16
+	BaseExplosive                int16
+	BaseMorale                   int16
+	Weapon                       *c2item.Item
+	Armor                        *c2item.Item
+	Assist                       *c2item.Item
+	// 地图相关属性
+	c2terrain.Terrain // 该 unit 所在的地形
+}
+
+// param
+// CharId: e.g. Caocao
+// CategoryId: e.g. 3
+// Level: e.g. 3
+func CreateUnit() *Unit {
+	return nil
+}
+
+// HP(MP) = 部队基本HP(MP) + 武将加成 + HP(MP)加成[等级 + 2(使用用印授的次数)]
+func (unit *Unit) LevelUp() bool {
+	unit.Level = unit.Level + 1
+	unit.MaxHP = int16(unit.UnitBaseHP) + int16(unit.CharExtraHP) + int16(unit.UnitExtraHP)*int16(unit.Level+2*unit.CategoryLevel)
+	unit.MaxMP = int16(unit.UnitBaseMP) + int16(unit.CharExtraMP) + int16(unit.UnitExtraMP)*int16(unit.Level+2*unit.CategoryLevel)
+	return true
+}
+
+func (unit *Unit) Transfer() bool {
+	unit.UnitCategory = c2unit_category.UnitCategoryList[unit.UnitCategory.TransferId]
+	unit.MaxHP = int16(unit.UnitBaseHP) + int16(unit.CharExtraHP) + int16(unit.UnitExtraHP)*int16(unit.Level+2*unit.CategoryLevel)
+	unit.MaxMP = int16(unit.UnitBaseMP) + int16(unit.CharExtraMP) + int16(unit.UnitExtraMP)*int16(unit.Level+2*unit.CategoryLevel)
+	unit.HP = unit.MaxHP      // 恢复HP
+	unit.MP = unit.MaxMP      // 恢复MP
+	unit.UnitStatus &= 0xfff0 // 恢复异常状态
+	return true
 }
 
 func (unit *Unit) GetAttackStatusEff() int16 {
@@ -129,59 +113,60 @@ func (unit *Unit) GetMoraletatusEff() int16 {
 	}
 }
 
-func (unit *Unit) GetBaseAttack() int16 {
-	return 0
-}
+func TerrainBonus(val int16, unit *Unit) int16 {
 
-func (unit *Unit) GetBaseSpirit() int16 {
-	return 0
-}
-
-func (unit *Unit) GetBase() int16 {
-	return 0
+	terrainBounsData, ok := c2unit_category.TerrainAbilityBonusLookUp[c2unit_category.UnitCategoryId(unit.UnitCategoryId)]
+	if !ok {
+		return val
+	}
+	return val * int16(terrainBounsData[unit.Terrain]) / HUNDRED
 }
 
 func (unit *Unit) GetAttack() int16 {
+	// 物品绝对值加成
 	attack := unit.BaseAttack + unit.Weapon.GetAttack() + unit.Armor.GetAttack() + unit.Assist.GetAttack()
 	ratio := int16(unit.Weapon.GetAttackRatio()) + int16(unit.Armor.GetAttackRatio()) + int16(unit.Assist.GetAttackRatio())
+	// 物品百分比加成
 	attack += unit.Assist.GetAttack() + int16(ratio/HUNDRED)
+	// 状态加成
 	attack = int16(attack * unit.GetAttackStatusEff() / HUNDRED)
-	return attack
+	// 地形加成
+	return TerrainBonus(attack, unit)
 }
 
 func (unit *Unit) GetSpirit() int16 {
-	attack := unit.BaseAttack + unit.Weapon.GetAttack() + unit.Armor.GetAttack() + unit.Assist.GetAttack()
-	ratio := int16(unit.Weapon.GetAttackRatio()) + int16(unit.Armor.GetAttackRatio()) + int16(unit.Assist.GetAttackRatio())
-	attack += unit.Assist.GetAttack() + int16(ratio/HUNDRED)
-	attack = int16(attack * unit.GetAttackStatusEff() / HUNDRED)
-	return attack
+	spirit := unit.BaseSpirit + unit.Weapon.GetSpirit() + unit.Armor.GetSpirit() + unit.Assist.GetSpirit()
+	ratio := int16(unit.Weapon.GetSpiritRatio()) + int16(unit.Armor.GetSpiritRatio()) + int16(unit.Assist.GetSpiritRatio())
+	spirit += int16(unit.BaseSpirit * ratio / HUNDRED)
+	spirit = int16(spirit * unit.GetSpiritStatusEff() / HUNDRED)
+	return spirit
 }
 
 func (unit *Unit) GetDefence() int16 {
-	attack := unit.BaseAttack + unit.Weapon.GetAttack() + unit.Armor.GetAttack() + unit.Assist.GetAttack()
-	ratio := int16(unit.Weapon.GetAttackRatio()) + int16(unit.Armor.GetAttackRatio()) + int16(unit.Assist.GetAttackRatio())
-	attack += unit.Assist.GetAttack() + int16(ratio/HUNDRED)
-	attack = int16(attack * unit.GetAttackStatusEff() / HUNDRED)
-	return attack
+	defence := unit.BaseDefence + unit.Weapon.GetDefence() + unit.Armor.GetDefence() + unit.Assist.GetDefence()
+	ratio := int16(unit.Weapon.GetDefenceRatio()) + int16(unit.Armor.GetDefenceRatio()) + int16(unit.Assist.GetDefenceRatio())
+	defence += int16(unit.BaseDefence * ratio / HUNDRED)
+	defence = int16(defence * unit.GetDefenceStatusEff() / HUNDRED)
+	return defence
 }
 
-func (unit *Unit) GetAgility() int16 {
-	attack := unit.BaseAttack + unit.Weapon.GetAttack() + unit.Armor.GetAttack() + unit.Assist.GetAttack()
-	ratio := int16(unit.Weapon.GetAttackRatio()) + int16(unit.Armor.GetAttackRatio()) + int16(unit.Assist.GetAttackRatio())
-	attack += unit.Assist.GetAttack() + int16(ratio/HUNDRED)
-	attack = int16(attack * unit.GetAttackStatusEff() / HUNDRED)
-	return attack
+func (unit *Unit) GetExplosive() int16 {
+	explosive := unit.BaseExplosive + unit.Weapon.GetExplosive() + unit.Armor.GetExplosive() + unit.Assist.GetExplosive()
+	ratio := int16(unit.Weapon.GetExplosiveRatio()) + int16(unit.Armor.GetExplosiveRatio()) + int16(unit.Assist.GetExplosiveRatio())
+	explosive += int16(unit.BaseExplosive * ratio / HUNDRED)
+	explosive = int16(explosive * unit.GetExplosiveStatusEff() / HUNDRED)
+	return explosive
 }
 
 func (unit *Unit) GetMorale() int16 {
-	attack := unit.BaseAttack + unit.Weapon.GetAttack() + unit.Armor.GetAttack() + unit.Assist.GetAttack()
-	ratio := int16(unit.Weapon.GetAttackRatio()) + int16(unit.Armor.GetAttackRatio()) + int16(unit.Assist.GetAttackRatio())
-	attack += unit.Assist.GetAttack() + int16(ratio/HUNDRED)
-	attack = int16(attack * unit.GetAttackStatusEff() / HUNDRED)
-	return attack
+	morale := unit.BaseMorale + unit.Weapon.GetMorale() + unit.Armor.GetMorale() + unit.Assist.GetMorale()
+	ratio := int16(unit.Weapon.GetMoraleRatio()) + int16(unit.Armor.GetMoraleRatio()) + int16(unit.Assist.GetMoraleRatio())
+	morale += int16(unit.BaseMorale * ratio / HUNDRED)
+	morale = int16(morale * unit.GetAttackStatusEff() / HUNDRED)
+	return morale
 }
 
-func (unit *Unit) GetMoveFromStatus() int16 {
+func (unit *Unit) GetMoveFromStatus() uint8 {
 	if unit.UnitStatus&c2status.UnitStatusMoveUp != 0 {
 		return 2
 	} else {
@@ -190,7 +175,8 @@ func (unit *Unit) GetMoveFromStatus() int16 {
 }
 func (unit *Unit) GetMove() uint8 {
 
-	return unit.Move + unit.Weapon.Move + unit.Armor.Move + unit.Assist.Move
+	return unit.Move + unit.Weapon.Move + unit.Armor.Move + unit.Assist.Move +
+		unit.GetMoveFromStatus()
 }
 
 // 同类的ConsumeItem是完全一致

@@ -1,10 +1,76 @@
-package c2char
+package c2unit_category
 
 // Level相关常量
 const (
 	MaxLevel         = 50
 	TransferLevelOne = 15
 	TransferLevelTwo = 30
+)
+
+type UnitCategoryId uint32
+
+const (
+	// JunZhu
+	UnitCategoryQunXiong UnitCategoryId = 1
+
+	// WuJiang
+	UnitCategoryBuBing     UnitCategoryId = 1 << 1
+	UnitCategoryQiBing     UnitCategoryId = 1 << 2
+	UnitCategoryGongBing   UnitCategoryId = 1 << 3
+	UnitCategoryGongQiBing UnitCategoryId = 1 << 4
+
+	// 穿文官衣服的武将, 奋起、鼓舞、气合提升攻击力
+	UnitCategoryWuDaoJia UnitCategoryId = 1 << 5
+	UnitCategoryZeiBing  UnitCategoryId = 1 << 6
+	UnitCategoryWuNiang  UnitCategoryId = 1 << 7
+	UnitCategoryPaoChe   UnitCategoryId = 1 << 8
+
+	// WenGuan
+	UnitCategoryDaoShi      UnitCategoryId = 1 << 9  // XuanWuBaoYu
+	UnitCategoryCeShi       UnitCategoryId = 1 << 10 // ZhuQueBaoYu
+	UnitCategoryFengShuiShi UnitCategoryId = 1 << 11 // BaiHuBaoYu
+	UnitCategoryQiMaCeShi   UnitCategoryId = 1 << 12 // QingLongBaoYu
+
+	// Special
+	UnitCategoryXiLiangQiBing UnitCategoryId = 1 << 13
+	UnitCategoryHuangJinZei   UnitCategoryId = 1 << 14
+	UnitCategoryHaiDao        UnitCategoryId = 1 << 15
+	UnitCategoryDuDu          UnitCategoryId = 1 << 16 //
+	UnitCategoryZhouShuShi    UnitCategoryId = 1 << 17 // All skills but Four-Shen, Four-High, Weather.
+	UnitCategoryXianRen       UnitCategoryId = 1 << 18 // All skills
+	UnitCategoryXunXiongShi   UnitCategoryId = 1 << 19 // SCABB = QiBing
+	UnitCategoryXunHuShi      UnitCategoryId = 1 << 20 // ACASC = WuShuJia
+	UnitCategoryMuRen         UnitCategoryId = 1 << 21 // ACASC = WuShuJia
+	UnitCategoryTuOu          UnitCategoryId = 1 << 22 // SCSBB = XiLiangQiBing
+	UnitCategoryBaiXing       UnitCategoryId = 1 << 23 //
+	UnitCategoryHuangDi       UnitCategoryId = 1 << 24 //
+	UnitCategoryYunShuDui     UnitCategoryId = 1 << 25 // CBCCB
+	// ZiZhongDui    UnitCategoryId = 1 << 23
+	// LiangMoDui    UnitCategoryId = 1 << 24
+	// 还有6个兵种空余
+
+	UnitCategoryWenGuan = UnitCategoryDaoShi | UnitCategoryCeShi | UnitCategoryFengShuiShi | UnitCategoryQiMaCeShi |
+		UnitCategoryDuDu | UnitCategoryZhouShuShi | UnitCategoryXianRen
+
+	UnitCategoryWuJiang = UnitCategoryBuBing | UnitCategoryQiBing | UnitCategoryGongBing | UnitCategoryGongQiBing |
+		UnitCategoryXiLiangQiBing | UnitCategoryQunXiong
+
+	UnitCategoryZongHe = UnitCategoryWuDaoJia | UnitCategoryZeiBing | UnitCategoryWuNiang | UnitCategoryPaoChe |
+		UnitCategoryHuangJinZei | UnitCategoryHaiDao | UnitCategoryXunXiongShi | UnitCategoryXunHuShi |
+		UnitCategoryHuangDi | UnitCategoryBaiXing | UnitCategoryMuRen | UnitCategoryTuOu | UnitCategoryYunShuDui
+
+	UnitCategoryForSword = UnitCategoryQunXiong | UnitCategoryBuBing | UnitCategoryZeiBing | UnitCategoryHaiDao | UnitCategoryHuangJinZei
+	UnitCategoryForLance = UnitCategoryQiBing | UnitCategoryXiLiangQiBing
+	UnitCategoryForBow   = UnitCategoryGongBing | UnitCategoryGongQiBing
+	UnitCategoryForClub  = UnitCategoryWuDaoJia | UnitCategoryWuNiang | UnitCategoryXunHuShi | UnitCategoryXunXiongShi |
+		UnitCategoryMuRen | UnitCategoryTuOu | UnitCategoryBaiXing | UnitCategoryHuangDi
+	UnitCategoryForCannon     = UnitCategoryPaoChe
+	UnitCategoryForMagicSword = UnitCategoryDaoShi | UnitCategoryFengShuiShi | UnitCategoryXianRen | UnitCategoryDuDu
+	UnitCategoryForMagicFan   = UnitCategoryCeShi | UnitCategoryQiMaCeShi | UnitCategoryZhouShuShi
+
+	UnitCategoryForArmor = UnitCategoryWuJiang
+	UnitCategoryForCloth = UnitCategoryWenGuan | UnitCategoryZongHe
+	UnitCategoryForAll   = UnitCategoryForArmor | UnitCategoryForCloth
 )
 
 // size: 64
@@ -15,12 +81,14 @@ type UnitCategoryBase struct {
 	SpiritInc      uint8  // X:5 S:4 A:3 B:2 C:1
 	ExplosiveInc   uint8  // X:5 S:4 A:3 B:2 C:1
 	MoraleInc      uint8  // X:5 S:4 A:3 B:2 C:1
-	BaseHP         uint8
-	BaseMP         uint8
-	ExtraHP        uint8
-	ExtraMP        uint8
+	UnitBaseHP     uint8  // HP when lv1
+	UnitBaseMP     uint8  // MP when lv1
+	UnitExtraHP    uint8  // inc when levelup
+	UnitExtraMP    uint8  // inc
 }
 
+// UnitCategory 相对于 UnitCategoryBase
+// 弓兵、弩兵、连弩兵 -> 弓兵
 type UnitCategory struct {
 	UnitCategoryBase
 	CategoryLevel uint8
@@ -41,10 +109,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   3,
 		MoraleInc:      3,
-		BaseHP:         100,
-		BaseMP:         30,
-		ExtraHP:        5,
-		ExtraMP:        1,
+		UnitBaseHP:     100,
+		UnitBaseMP:     30,
+		UnitExtraHP:    5,
+		UnitExtraMP:    1,
 	},
 	{ // BuBing
 		UnitCategoryId: 0x2,
@@ -53,10 +121,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     4,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         110,
-		BaseMP:         10,
-		ExtraHP:        6,
-		ExtraMP:        1,
+		UnitBaseHP:     110,
+		UnitBaseMP:     10,
+		UnitExtraHP:    6,
+		UnitExtraMP:    1,
 	},
 	{ // QiBing
 		UnitCategoryId: 0x4,
@@ -65,10 +133,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         100,
-		BaseMP:         10,
-		ExtraHP:        5,
-		ExtraMP:        1,
+		UnitBaseHP:     100,
+		UnitBaseMP:     10,
+		UnitExtraHP:    5,
+		UnitExtraMP:    1,
 	},
 	{ // GongBing
 		UnitCategoryId: 0x8,
@@ -77,10 +145,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      4,
-		BaseHP:         90,
-		BaseMP:         10,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     10,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 	{ // GongQiBing
 		UnitCategoryId: 0x10,
@@ -89,10 +157,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      3,
-		BaseHP:         100,
-		BaseMP:         10,
-		ExtraHP:        5,
-		ExtraMP:        1,
+		UnitBaseHP:     100,
+		UnitBaseMP:     10,
+		UnitExtraHP:    5,
+		UnitExtraMP:    1,
 	},
 	{ // WuDaoJia
 		UnitCategoryId: 0x20,
@@ -101,10 +169,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   4,
 		MoraleInc:      2,
-		BaseHP:         90,
-		BaseMP:         20,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     20,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 	{ // ZeiBing
 		UnitCategoryId: 0x40,
@@ -113,10 +181,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      4,
-		BaseHP:         100,
-		BaseMP:         20,
-		ExtraHP:        5,
-		ExtraMP:        1,
+		UnitBaseHP:     100,
+		UnitBaseMP:     20,
+		UnitExtraHP:    5,
+		UnitExtraMP:    1,
 	},
 	{ // WuNiang
 		UnitCategoryId: 0x80,
@@ -124,11 +192,11 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		SpiritInc:      2,
 		DefenseInc:     2,
 		ExplosiveInc:   4,
-		MoraleInc:      3,
-		BaseHP:         90,
-		BaseMP:         20,
-		ExtraHP:        3,
-		ExtraMP:        1,
+		MoraleInc:      2,
+		UnitBaseHP:     90,
+		UnitBaseMP:     20,
+		UnitExtraHP:    3,
+		UnitExtraMP:    1,
 	},
 	{ // PaoChe
 		UnitCategoryId: 0x100,
@@ -137,10 +205,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   1,
 		MoraleInc:      3,
-		BaseHP:         90,
-		BaseMP:         10,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     10,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 	{ // DaoShi
 		UnitCategoryId: 0x200,
@@ -149,10 +217,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   3,
 		MoraleInc:      2,
-		BaseHP:         80,
-		BaseMP:         40,
-		ExtraHP:        3,
-		ExtraMP:        2,
+		UnitBaseHP:     80,
+		UnitBaseMP:     40,
+		UnitExtraHP:    3,
+		UnitExtraMP:    2,
 	},
 	{ // CeShi
 		UnitCategoryId: 0x400,
@@ -161,10 +229,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         90,
-		BaseMP:         40,
-		ExtraHP:        4,
-		ExtraMP:        2,
+		UnitBaseHP:     90,
+		UnitBaseMP:     40,
+		UnitExtraHP:    4,
+		UnitExtraMP:    2,
 	},
 	{ // FengShuiShi
 		UnitCategoryId: 0x800,
@@ -173,10 +241,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     1,
 		ExplosiveInc:   3,
 		MoraleInc:      3,
-		BaseHP:         80,
-		BaseMP:         50,
-		ExtraHP:        3,
-		ExtraMP:        2,
+		UnitBaseHP:     80,
+		UnitBaseMP:     50,
+		UnitExtraHP:    3,
+		UnitExtraMP:    2,
 	},
 	{ // QiMaCeShi
 		UnitCategoryId: 0x1000,
@@ -185,10 +253,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      1,
-		BaseHP:         100,
-		BaseMP:         40,
-		ExtraHP:        5,
-		ExtraMP:        2,
+		UnitBaseHP:     100,
+		UnitBaseMP:     40,
+		UnitExtraHP:    5,
+		UnitExtraMP:    2,
 	},
 	{ // XiLiangQiBing
 		UnitCategoryId: 0x2000,
@@ -197,10 +265,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     4,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         110,
-		BaseMP:         50,
-		ExtraHP:        6,
-		ExtraMP:        1,
+		UnitBaseHP:     110,
+		UnitBaseMP:     50,
+		UnitExtraHP:    6,
+		UnitExtraMP:    1,
 	},
 	{ // HuangJinZei
 		UnitCategoryId: 0x4000,
@@ -209,10 +277,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      1,
-		BaseHP:         90,
-		BaseMP:         40,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     40,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 	{ // HaiDao
 		UnitCategoryId: 0x8000,
@@ -221,10 +289,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   3,
 		MoraleInc:      2,
-		BaseHP:         90,
-		BaseMP:         20,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     20,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 	{ // DuDu
 		UnitCategoryId: 0x10000,
@@ -233,10 +301,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         90,
-		BaseMP:         30,
-		ExtraHP:        4,
-		ExtraMP:        2,
+		UnitBaseHP:     90,
+		UnitBaseMP:     30,
+		UnitExtraHP:    4,
+		UnitExtraMP:    2,
 	},
 	{ // ZhouShuShi
 		UnitCategoryId: 0x20000,
@@ -245,10 +313,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     2,
 		ExplosiveInc:   2,
 		MoraleInc:      3,
-		BaseHP:         80,
-		BaseMP:         60,
-		ExtraHP:        3,
-		ExtraMP:        3,
+		UnitBaseHP:     80,
+		UnitBaseMP:     60,
+		UnitExtraHP:    3,
+		UnitExtraMP:    3,
 	},
 	{ // XianRen
 		UnitCategoryId: 0x40000,
@@ -257,10 +325,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     1,
 		ExplosiveInc:   3,
 		MoraleInc:      4,
-		BaseHP:         80,
-		BaseMP:         60,
-		ExtraHP:        3,
-		ExtraMP:        3,
+		UnitBaseHP:     80,
+		UnitBaseMP:     60,
+		UnitExtraHP:    3,
+		UnitExtraMP:    3,
 	},
 	{ // XunXiongShi
 		UnitCategoryId: 0x80000,
@@ -269,10 +337,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   2,
 		MoraleInc:      2,
-		BaseHP:         110,
-		BaseMP:         5,
-		ExtraHP:        6,
-		ExtraMP:        1,
+		UnitBaseHP:     110,
+		UnitBaseMP:     5,
+		UnitExtraHP:    6,
+		UnitExtraMP:    1,
 	},
 	{ // XunHuShi
 		UnitCategoryId: 0x10000,
@@ -281,10 +349,10 @@ var UnitCategoryBaseList = []UnitCategoryBase{
 		DefenseInc:     3,
 		ExplosiveInc:   4,
 		MoraleInc:      1,
-		BaseHP:         90,
-		BaseMP:         5,
-		ExtraHP:        4,
-		ExtraMP:        1,
+		UnitBaseHP:     90,
+		UnitBaseMP:     5,
+		UnitExtraHP:    4,
+		UnitExtraMP:    1,
 	},
 }
 var UnitCategoryList = []UnitCategory{
@@ -849,7 +917,7 @@ var UnitCategoryList = []UnitCategory{
 		BattleFieldId:     50,
 		Name:              "皇帝",
 	},
-	{ // BaiXing && HuangDi
+	{ // YunShuDui
 		UnitCategoryBase:  UnitCategoryBaseList[UnitCategoryYunShuDui],
 		CategoryLevel:     0,
 		AttackRange:       AttackRange0, // cannot attack

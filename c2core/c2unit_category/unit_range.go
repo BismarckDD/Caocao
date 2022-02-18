@@ -1,4 +1,4 @@
-package c2char
+package c2unit_category
 
 type EculidRange uint8
 
