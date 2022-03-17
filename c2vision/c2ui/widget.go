@@ -2,24 +2,26 @@ package c2ui
 
 // RenderPriority determines in which order ui elements are drawn.
 // The higher the number the later an element is drawn.
-type RenderPriority int
+type RenderPriority uint8
 
 // Render priorities that determine the order in which widgets/widgetgroups are
 // rendered. The higher the later it is rendered
 const (
 	RenderPriorityBackground RenderPriority = iota
 	RenderPriorityMap
+	RenderPriorityUnit // 战场单位
 	RenderPriorityUnitStatsPanel
+	RenderPriorityUnitInfoPanel
 	RenderPriorityConversation
 	RenderPriorityInventory
 	RenderPriorityMiniMap
-	RenderPriorityHelpPanel
 	RenderPriorityForeground
 )
 
 // Widget defines an object that is a UI widget
 type Widget interface {
 	Drawable
+	bindManager(ui *UIManager)
 	SetManager(ui *UIManager)
 	GetManager() (ui *UIManager)
 	OnMouseMove(x int, y int)
@@ -68,6 +70,10 @@ func NewBaseWidget(manager *UIManager) *BaseWidget {
 		visible:        true,
 		renderPriority: RenderPriorityBackground,
 	}
+}
+
+func (b *BaseWidget) bindManager(manager *UIManager) {
+	b.manager = manager
 }
 
 // this seems a public function

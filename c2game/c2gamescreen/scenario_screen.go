@@ -1,4 +1,4 @@
-package c2game
+package c2gamescreen
 
 import (
 	"github.com/blizzy78/ebitenui"

@@ -1,12 +1,10 @@
 package c2ui
 
-import (
-	"github.com/hajimehoshi/ebiten"
-)
+import "github.com/BismarckDD/Caocao/c2common/c2interface"
 
 // Drawable represents an instance that can be drawn
 type Drawable interface {
-	Render(target ebiten.Image)
+	Render(target c2interface.Surface)
 	Advance(elapsed float64) error
 	GetSize() (width, height int)
 	SetPosition(x, y int)

@@ -73,29 +73,44 @@ type ButtonLayout struct {
 	Toggleable       bool
 	AllowFrameChange bool
 	HasImage         bool
-	Tooltip          int
+	Tooltip          uint8
 	TooltipXOffset   int
 	TooltipYOffset   int
 }
 
 const (
-	buttonTooltipNone int = iota
-	buttonTooltipClose
-	buttonTooltipOk
-	buttonTooltipBuy
-	buttonTooltipSell
-	buttonTooltipRepair
-	buttonTooltipRepairAll
+	buttonTooltipNone uint8 = iota
+	buttonTooltipExit
+	buttonTooltipSave
+	buttonTooltipLoad
+	buttonTooltipConfiguration
+	buttonTooltipCharInfo
+	buttonTooltipItemInfo
+	buttonTooltipTerrainInfo
+	buttonTooltipTreasureInfo
+	buttonTooltipXXXX
+	buttonTooltipWinCondition
+	buttonTooltipSmallBattleMap
+	buttonTooltipEndRound
+	buttonTooltipOK
+	buttonTooltipCancel
+	buttonTooltipDispatch // 出兵
+	buttonTooltipEquip    // 装备
+	buttonTooltipBuy      // 买入
+	buttonTooltipSell     // 卖出
 	buttonTooltipLeftArrow
 	buttonTooltipRightArrow
-	buttonTooltipQuery
-	buttonTooltipSquelchChat
 )
 
 const (
-	buttonMenuSegmentsX     = 2
-	buttonMenuSegmentsY     = 1
-	buttonMenuDisabledFrame = -1
+	buttonBuySellTooltipXOffset = 15
+	buttonBuySellTooltipYOffset = -2
+)
+
+const (
+	buttonWideSegmentsX     = 2
+	buttonWideSegmentsY     = 1
+	buttonWideDisabledFrame = -1
 	buttonWideTextOffset    = 1
 
 	buttonShortSegmentsX     = 1
@@ -288,7 +303,7 @@ type Button struct {
 }
 
 // NewButton creates an instance of Button
-func (ui *UIResource) NewButton(buttonType ButtonType, text string) *Button {
+func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	buttonLayout := getButtonLayouts()[buttonType]
 
 	btn := ui.createButton(buttonLayout, text)
@@ -297,7 +312,7 @@ func (ui *UIResource) NewButton(buttonType ButtonType, text string) *Button {
 }
 
 // NewDefaultButton creates a new button with default settings
-func (ui *UIResource) NewDefaultButton(path string, frame int) *Button {
+func (ui *UIManager) NewDefaultButton(path string, frame int) *Button {
 	layout := &ButtonLayout{
 		XSegments:        1,
 		YSegments:        1,
@@ -320,7 +335,7 @@ func (ui *UIResource) NewDefaultButton(path string, frame int) *Button {
 }
 
 // createButton creates button using input layout and text
-func (ui *UIResource) createButton(layout *ButtonLayout, text string) *Button {
+func (ui *UIManager) createButton(layout *ButtonLayout, text string) *Button {
 	base := NewBaseWidget(ui)
 	base.SetVisible(true)
 
@@ -398,40 +413,46 @@ func (v *Button) createTooltip() {
 	switch v.buttonLayout.Tooltip {
 	case buttonTooltipNone:
 		return
-	case buttonTooltipClose:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("strClose"))
-	case buttonTooltipOk:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString(c2enum.OKLabel))
+	case buttonTooltipExit:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("退出游戏")
+	case buttonTooltipSave:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("保存游戏")
+	case buttonTooltipLoad:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("读取进度")
+	case buttonTooltipConfiguration:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("游戏设置")
 	case buttonTooltipBuy:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("NPCPurchaseItems"))
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("买入物品或者装备")
 	case buttonTooltipSell:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("NPCSellItems"))
-	case buttonTooltipRepair:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("NPCRepairItems"))
-	case buttonTooltipRepairAll:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString(c2enum.RepairAll))
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("卖出物品或者装备")
 	case buttonTooltipLeftArrow:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("KeyLeft"))
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("KeyLeft")
 	case buttonTooltipRightArrow:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("KeyRight"))
-	case buttonTooltipQuery:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("")) // need to be set up
-	case buttonTooltipSquelchChat:
-		t = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("strParty19")) // need to be verivied
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("KeyRight")
+	case buttonTooltipCharInfo:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("武将信息")
+	case buttonTooltipTerrainInfo:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("地形信息")
+	case buttonTooltipItemInfo:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("物品信息")
+	case buttonTooltipTreasureInfo:
+		toolTip = v.manager.NewTooltip(c2resource.Font16, c2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		toolTip.SetText("宝物图鉴")
 	}
 
-	t.SetVisible(false)
-	v.SetTooltip(t)
+	toolTip.SetVisible(false)
+	v.SetTooltip(toolTip)
 }
 
 func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {

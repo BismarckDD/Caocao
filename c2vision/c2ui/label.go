@@ -27,7 +27,7 @@ type Label struct {
 
 // NewLabel creates a new instance of a UI label
 func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
-	font, err := ui.asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
+	font, err := c2utils.LoadFont(fontPath)
 	if err != nil {
 		ui.Error(err.Error())
 		return nil

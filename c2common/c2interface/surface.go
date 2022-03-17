@@ -3,6 +3,8 @@ package c2interface
 import (
 	"image"
 	"image/color"
+
+	"github.com/BismarckDD/Caocao/c2common/c2enum"
 )
 
 // Surface represents a renderable surface.
@@ -17,6 +19,8 @@ type Surface interface {
 	Pop()
 	PopN(n int)
 	PushColor(color color.Color)
+	PushEffect(effect c2enum.DrawEffect)
+	PushFilter(filter c2enum.Filter)
 	PushTranslation(x, y int)
 	PushSkew(x, y float64)
 	PushScale(x, y float64)

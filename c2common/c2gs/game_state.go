@@ -1,4 +1,4 @@
-package c2game
+package c2gs
 
 type GameState struct {
 }

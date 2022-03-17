@@ -99,31 +99,31 @@ func (game *Game) ToMainMenu() {
 
 	// the outermost container muse use grid layout
 	// otherwise the inner container will collapse (disappear.).
-	container := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewGridLayout(
-			widget.GridLayoutOpts.Padding(widget.Insets{Top: 0, Left: 0, Bottom: 0, Right: 0}),
-			widget.GridLayoutOpts.Spacing(0, 0),
-			widget.GridLayoutOpts.Columns(1),
-			widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, false, true}),
-		)),
-		// widget.ContainerOpts.BackgroundImage(game.GetUIRes().Background)
-	)
-
 	// container := widget.NewContainer(
-	// 	widget.ContainerOpts.Layout(widget.NewRowLayout(
-	// 		widget.RowLayoutOpts.Padding(widget.Insets{Top: 0, Left: 0, Bottom: 0, Right: 0}),
-	// 		widget.RowLayoutOpts.Spacing(0),
-	// 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+	// 	widget.ContainerOpts.Layout(widget.NewGridLayout(
+	// 		widget.GridLayoutOpts.Padding(widget.Insets{Top: 0, Left: 0, Bottom: 0, Right: 0}),
+	// 		widget.GridLayoutOpts.Spacing(0, 0),
+	// 		widget.GridLayoutOpts.Columns(1),
+	// 		widget.GridLayoutOpts.Stretch([]bool{true}, []bool{false, false, true}),
 	// 	)),
-	// 	widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
-	// 		widget.RowLayoutData{
-	// 			Stretch:   true,
-	// 			MaxWidth:  1280,
-	// 			MaxHeight: 960,
-	// 			Position:  0,
-	// 		},
-	// 	)),
-	// widget.ContainerOpts.BackgroundImage(game.GetUIRes().Background))
+	// 	// widget.ContainerOpts.BackgroundImage(game.GetUIRes().Background)
+	// )
+
+	container := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Padding(widget.Insets{Top: 0, Left: 0, Bottom: 0, Right: 0}),
+			widget.RowLayoutOpts.Spacing(0),
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+		)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(
+			widget.RowLayoutData{
+				Stretch:   true,
+				MaxWidth:  1280,
+				MaxHeight: 960,
+				Position:  0,
+			},
+		)),
+		widget.ContainerOpts.BackgroundImage(game.GetUIRes().Background))
 
 	game.containers = []*widget.PreferredSizeLocateableWidget{}
 	c1 := CreateWindowsStyleMenu(game.uiRes)

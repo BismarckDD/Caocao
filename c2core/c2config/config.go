@@ -20,4 +20,8 @@ type Configuration struct {
 	BattleFieldScreenY int
 	MenuHeight         int
 	FramesPerAction    int
+	FullScreen         bool
+	RunInBackground    bool
+	VsyncEnabled       bool
+	TicksPerSecond     int
 }

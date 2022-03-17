@@ -41,8 +41,17 @@ type Unit struct {
 // CharId: e.g. Caocao
 // CategoryId: e.g. 3
 // Level: e.g. 3
-func CreateUnit() *Unit {
-	return nil
+func CreateUnit(level uint8, charId uint16, categoryId uint32) *Unit {
+
+	return &Unit{
+		Level:        level,
+		Char:         CharList[charId],
+		UnitCategory: c2unit_category.UnitCategoryList[categoryId],
+		Direction:    0,
+		Weapon:       nil,
+		Armor:        nil,
+		Assist:       nil,
+	}
 }
 
 // HP(MP) = 部队基本HP(MP) + 武将加成 + HP(MP)加成[等级 + 2(使用用印授的次数)]
@@ -115,10 +124,12 @@ func (unit *Unit) GetMoraletatusEff() int16 {
 
 func TerrainBonus(val int16, unit *Unit) int16 {
 
+	// 从查找表中找到兵种对应的地形信息
 	terrainBounsData, ok := c2unit_category.TerrainAbilityBonusLookUp[c2unit_category.UnitCategoryId(unit.UnitCategoryId)]
 	if !ok {
 		return val
 	}
+	// 加入地形信息
 	return val * int16(terrainBounsData[unit.Terrain]) / HUNDRED
 }
 
@@ -139,7 +150,7 @@ func (unit *Unit) GetSpirit() int16 {
 	ratio := int16(unit.Weapon.GetSpiritRatio()) + int16(unit.Armor.GetSpiritRatio()) + int16(unit.Assist.GetSpiritRatio())
 	spirit += int16(unit.BaseSpirit * ratio / HUNDRED)
 	spirit = int16(spirit * unit.GetSpiritStatusEff() / HUNDRED)
-	return spirit
+	return TerrainBonus(spirit, unit)
 }
 
 func (unit *Unit) GetDefence() int16 {
@@ -147,7 +158,7 @@ func (unit *Unit) GetDefence() int16 {
 	ratio := int16(unit.Weapon.GetDefenceRatio()) + int16(unit.Armor.GetDefenceRatio()) + int16(unit.Assist.GetDefenceRatio())
 	defence += int16(unit.BaseDefence * ratio / HUNDRED)
 	defence = int16(defence * unit.GetDefenceStatusEff() / HUNDRED)
-	return defence
+	return TerrainBonus(defence, unit)
 }
 
 func (unit *Unit) GetExplosive() int16 {
@@ -155,7 +166,7 @@ func (unit *Unit) GetExplosive() int16 {
 	ratio := int16(unit.Weapon.GetExplosiveRatio()) + int16(unit.Armor.GetExplosiveRatio()) + int16(unit.Assist.GetExplosiveRatio())
 	explosive += int16(unit.BaseExplosive * ratio / HUNDRED)
 	explosive = int16(explosive * unit.GetExplosiveStatusEff() / HUNDRED)
-	return explosive
+	return TerrainBonus(explosive, unit)
 }
 
 func (unit *Unit) GetMorale() int16 {
@@ -163,7 +174,7 @@ func (unit *Unit) GetMorale() int16 {
 	ratio := int16(unit.Weapon.GetMoraleRatio()) + int16(unit.Armor.GetMoraleRatio()) + int16(unit.Assist.GetMoraleRatio())
 	morale += int16(unit.BaseMorale * ratio / HUNDRED)
 	morale = int16(morale * unit.GetAttackStatusEff() / HUNDRED)
-	return morale
+	return TerrainBonus(morale, unit)
 }
 
 func (unit *Unit) GetMoveFromStatus() uint8 {
@@ -191,11 +202,11 @@ func (unit *Unit) Use(item *c2item.ConsumeItem) bool {
 // 比如两把钢枪，一把lv1，一把lv3
 func (unit *Unit) Equip(item *c2item.Item) bool {
 	if item.AdaptPosEnum == c2item.AdaptPosEnumWeapon {
-
+		unit.Weapon = item
 	} else if item.AdaptPosEnum == c2item.AdaptPosEnumArmor {
-
+		unit.Armor = item
 	} else if item.AdaptPosEnum == c2item.AdaptPosEnumAssit {
-
+		unit.Assist = item
 	}
 	return true
 }

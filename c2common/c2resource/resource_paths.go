@@ -4,9 +4,8 @@ package c2resource
 const (
 	// --- Language
 
-	// DIABLO_ROOT = "/Users/bismarckdd/Applications/Diablo"
 	LocalLanguage      = "/data/local/use"
-	LanguageFontToken  = "{LANG_FONT}"
+	LanguageFontToken  = "{LANG_FONT}" //nolint:gosec // this is just a format string
 	LanguageTableToken = "{LANG}"
 
 	// --- Screens ---
@@ -201,19 +200,19 @@ const (
 	CursorDefault = "/data/global/ui/CURSOR/ohand.DC6"
 
 	// --- Fonts & Locale (strings) ---
-	Font6                = "/data/local/font/" + LanguageFontToken + "/font6"
-	Font8                = "/data/local/font/" + LanguageFontToken + "/font8"
-	Font16               = "/data/local/font/" + LanguageFontToken + "/font16"
-	Font24               = "/data/local/font/" + LanguageFontToken + "/font24"
-	Font30               = "/data/local/font/" + LanguageFontToken + "/font30"
-	Font42               = "/data/local/font/" + LanguageFontToken + "/font42"
-	FontFormal12         = "/data/local/font/" + LanguageFontToken + "/fontformal12"
-	FontFormal11         = "/data/local/font/" + LanguageFontToken + "/fontformal11"
-	FontFormal10         = "/data/local/font/" + LanguageFontToken + "/fontformal10"
-	FontExocet10         = "/data/local/font/" + LanguageFontToken + "/fontexocet10"
-	FontExocet8          = "/data/local/font/" + LanguageFontToken + "/fontexocet8"
-	FontSucker           = "/data/local/font/" + LanguageFontToken + "/ReallyTheLastSucker"
-	FontRediculous       = "/data/local/font/" + LanguageFontToken + "/fontridiculous"
+	Font6                = "/data/local/FONT/" + LanguageFontToken + "/font6"
+	Font8                = "/data/local/FONT/" + LanguageFontToken + "/font8"
+	Font16               = "/data/local/FONT/" + LanguageFontToken + "/font16"
+	Font24               = "/data/local/FONT/" + LanguageFontToken + "/font24"
+	Font30               = "/data/local/FONT/" + LanguageFontToken + "/font30"
+	Font42               = "/data/local/FONT/" + LanguageFontToken + "/font42"
+	FontFormal12         = "/data/local/FONT/" + LanguageFontToken + "/fontformal12"
+	FontFormal11         = "/data/local/FONT/" + LanguageFontToken + "/fontformal11"
+	FontFormal10         = "/data/local/FONT/" + LanguageFontToken + "/fontformal10"
+	FontExocet10         = "/data/local/FONT/" + LanguageFontToken + "/fontexocet10"
+	FontExocet8          = "/data/local/FONT/" + LanguageFontToken + "/fontexocet8"
+	FontSucker           = "/data/local/FONT/" + LanguageFontToken + "/ReallyTheLastSucker"
+	FontRediculous       = "/data/local/FONT/" + LanguageFontToken + "/fontridiculous"
 	ExpansionStringTable = "/data/local/lng/" + LanguageTableToken + "/expansionstring.tbl"
 	StringTable          = "/data/local/lng/" + LanguageTableToken + "/string.tbl"
 	PatchStringTable     = "/data/local/lng/" + LanguageTableToken + "/patchstring.tbl"
